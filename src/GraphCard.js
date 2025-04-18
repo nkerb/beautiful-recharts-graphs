@@ -10,6 +10,7 @@ const dark_gray = 'hsl(210, 5%, 45%)';
 
 const barRadius = 16;
 const radiusArray = [barRadius, barRadius, 0, 0];
+const labelFontSize = 14;
 
 const CardContainer = styled.div`
   box-sizing: border-box;
@@ -67,6 +68,12 @@ const formatMonthLabelLong = (dateString) => {
   const date = new Date(dateString); // Create a JS Date object from the provided string
   const options = { year: 'numeric', month: 'long' };
   return date.toLocaleDateString('en-US', options); // Output example: "July 2022"
+}
+
+const formatMonthLabelShort = (dateString) => {
+  const date = new Date(dateString); // Create a JS Date object from the provided string
+  const options = { year: '2-digit', month: '2-digit' };
+  return date.toLocaleDateString('en-US', options); // Output example: "07/22"
 }
 
 const formatValueInMillionDollars = (value) => {
@@ -134,14 +141,30 @@ const GraphCard = ({ data, dataStyles, height, width, minWidth, maxWidth, xAxisK
         <BarChart
           data={data}
           stackOffset='sign' // Allow both positive and negative values to be shown on the graph
-          margin={{ left: 13, top: 20, right: 10, bottom: 20 }}
+          margin={{ left: 13, top: 20, right: 10, bottom: 50 }}
         >
-          <XAxis dataKey={xAxisKey} />
-          <YAxis type='number'>
+          <XAxis
+            dataKey={xAxisKey}
+            tickFormatter={(value) => formatMonthLabelShort(value)} // Use human-friendly date format
+            angle={-60}
+            dy={18}
+            dx={-6}
+            axisLine={false}
+            tickLine={false}
+            fontSize={labelFontSize}
+          />
+          <YAxis
+            type='number'
+            tickFormatter={(value) => value.toLocaleString()} // Add commas
+            axisLine={false}
+            tickLine={false}
+            fontSize={labelFontSize}
+          >
             <Label
               angle={-90}
               position='left'
               style={{ textAnchor: 'middle' }}
+              fontSize={labelFontSize}
             >
               {yAxisLabel}
             </Label>
@@ -185,7 +208,11 @@ const GraphCard = ({ data, dataStyles, height, width, minWidth, maxWidth, xAxisK
               })}
             </Bar>
           )}
-          <Legend />
+          <Legend
+            wrapperStyle={{
+              marginBottom: -30,
+            }}
+          />
         </BarChart>
       </ResponsiveContainer>
     </CardContainer>
