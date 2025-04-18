@@ -6,8 +6,6 @@ const off_black = 'hsl(210, 5%, 15%)';
 const darkest_gray = 'hsl(210, 5%, 30%)';
 const dark_gray = 'hsl(210, 5%, 45%)';
 
-const exportFill = 'hsl(205, 90%, 30%)';
-const importFill = 'hsl(155, 90%, 25%)';
 const barRadius = 16;
 const radiusArray = [barRadius, barRadius, 0, 0];
 
@@ -41,7 +39,7 @@ const CardSubtitle = styled.span`
   color: ${darkest_gray};
 `;
 
-const GraphCard = ({ data, height, width, minWidth, maxWidth, xAxisKey, yAxisLabel, title, subtitle }) => {
+const GraphCard = ({ data, dataStyles, height, width, minWidth, maxWidth, xAxisKey, yAxisLabel, title, subtitle }) => {
   return (
     <CardContainer
       height={height}
@@ -73,20 +71,16 @@ const GraphCard = ({ data, height, width, minWidth, maxWidth, xAxisKey, yAxisLab
           <Tooltip />
           <Legend />
           <ReferenceLine y={0} stroke={dark_gray} />
-          <Bar
-            dataKey='exports'
-            name='Exports'
-            fill={exportFill}
-            stackId={0}
-            radius={radiusArray}
-          />
-          <Bar
-            dataKey='imports'
-            name='Imports'
-            fill={importFill}
-            stackId={0}
-            radius={radiusArray}
-          />
+          {dataStyles.map((b) =>
+            <Bar
+              key={b.id}
+              dataKey={b.id}
+              name={b.displayName}
+              fill={b.fillColor}
+              stackId={0}
+              radius={radiusArray}
+            />
+          )}
         </BarChart>
       </ResponsiveContainer>
     </CardContainer>

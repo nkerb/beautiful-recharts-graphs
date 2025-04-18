@@ -5,6 +5,7 @@ function App() {
   return (
     <GraphCard
       data={FruitTradeDeficitMonthlyData}
+      dataStyles={FruitTradeDataStyles}
       xAxisKey='month'
       yAxisLabel='Millions of USD ($)'
       height={500}
@@ -78,5 +79,18 @@ const FruitTradeDeficitMonthlyData = [
     month: '2022-12-01', // December 1st, 2022
     exports: 1267,
     imports: -1703
+  }
+]
+
+const FruitTradeDataStyles = [
+  {
+    id: 'exports',
+    displayName: 'Exports',
+    fillColor: 'hsl(205, 90%, 30%)'
+  },
+  {
+    id: 'imports',
+    displayName: 'Imports',
+    fillColor: 'hsl(155, 90%, 25%)'
   }
 ]
