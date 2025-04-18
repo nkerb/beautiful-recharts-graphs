@@ -80,6 +80,23 @@ const formatValueInMillionDollars = (value) => {
   return `$${Math.abs(value).toLocaleString()}M`; // Use absolute value here since we don't want to actually display negative values for imports
 }
 
+const checkVisibleDataIsBilateral = (data, xAxisKey, shownDatasets) => {
+  let hasPositive = false;
+  let hasNegative = false;
+
+  for (const item of data) {
+    for (const key in item) {
+      if (key !== xAxisKey) { // Exclude the non-numeric x-axis key
+        if (item[key] > 0 && shownDatasets[key]) hasPositive = true; // Check if there is a positive value *in a dataset is currently visible*
+        if (item[key] < 0 && shownDatasets[key]) hasNegative = true; // Check if there is a negative value *in a dataset is currently visible*
+        if (hasPositive && hasNegative) return true; // Exit early if data is bilateral
+      }
+    }
+  }
+
+  return hasPositive && hasNegative;
+};
+
 const CustomTooltip = ({ payload, label }) => {
   return (
     <HoverContainer>
@@ -112,6 +129,7 @@ const GraphCard = ({ data, dataStyles, height, width, minWidth, maxWidth, xAxisK
       return obj;
     }, {})
   );
+  const [hasBilateralData, setHasBilateralData] = useState(checkVisibleDataIsBilateral(data, xAxisKey, shownDatasets));
 
   const timeoutRef = useRef(null);
 
@@ -130,10 +148,12 @@ const GraphCard = ({ data, dataStyles, height, width, minWidth, maxWidth, xAxisK
 
   const handleLegendItemClick = (id) => {
     setLegendHover(null); // Turn off the hover fade if the user has just toggled the visibility of the legend item
-    setShownDatasets({
+    const newShownDatasets = {
       ...shownDatasets,
-      [id]: !shownDatasets[id] // Toggle the visibility of the selected legend item
-    })
+      [id]: !shownDatasets[id]
+    };
+    setShownDatasets(newShownDatasets);
+    setHasBilateralData(checkVisibleDataIsBilateral(data, xAxisKey, newShownDatasets));
   }
 
   useEffect(() => {
@@ -193,7 +213,7 @@ const GraphCard = ({ data, dataStyles, height, width, minWidth, maxWidth, xAxisK
               transition: `opacity 0.2s ease, transform 0.4s ease-in-out` // Add opacity transition for fade in/out effect. transform is default for the tooltip's movement, but it's easier to just declare it again than try to pull in existing wrapper styling
             }}
           />
-          <ReferenceLine y={0} stroke={dark_gray} />
+          {hasBilateralData && <ReferenceLine y={0} stroke={dark_gray} />}
           {dataStyles.map((b) =>
             <Bar
               key={b.id}
@@ -203,7 +223,7 @@ const GraphCard = ({ data, dataStyles, height, width, minWidth, maxWidth, xAxisK
               fill={b.fillColor}
               opacity={(legendHover === null || b.id === legendHover) ? 1 : 0.8} // Reduce opacity if another dataset is hovered in legend
               stackId={0}
-              radius={radiusArray}
+              radius={hasBilateralData ? radiusArray : barRadius} // Apply radius to all 4 corners if only showing one dataset, otherwise only round top/bottom corners
               style={{
                 cursor: 'pointer',
                 transition: 'fill 0.2s ease, opacity 0.2s ease' // Smooth transition for bar hover (fill) and dataset legend hover (opacity)
