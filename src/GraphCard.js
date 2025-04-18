@@ -1,5 +1,5 @@
 import { darken } from 'polished';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Bar, BarChart, Cell, Label, Legend, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import styled from "styled-components";
 
@@ -96,6 +96,27 @@ const CustomTooltip = ({ payload, label }) => {
 
 const GraphCard = ({ data, dataStyles, height, width, minWidth, maxWidth, xAxisKey, yAxisLabel, title, subtitle }) => {
   const [hoveredBar, setHoveredBar] = useState(null);
+  const [tooltipActive, setTooltipActive] = useState(false);
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+
+  const timeoutRef = useRef(null);
+
+  const handleBarMouseEnter = () => {
+    clearTimeout(timeoutRef.current); // Clear any pending timeouts
+    setTooltipActive(true); // Set active to true so tooltip is created in the DOM
+    setTooltipVisible(true); // Set visible to true so tooltip is displayed
+  };
+
+  const handleBarMouseLeave = () => {
+    setTooltipVisible(false); // Immediately hide the tooltip, start the fade transition
+    timeoutRef.current = setTimeout(() => {
+      setTooltipActive(false); // After fade transition ends, set active to false to remove the tooltip from the DOM
+    }, 200);
+  }
+
+  useEffect(() => {
+    return () => clearTimeout(timeoutRef.current); // Clear timeout on unmount
+  });
 
   return (
     <CardContainer
@@ -128,6 +149,11 @@ const GraphCard = ({ data, dataStyles, height, width, minWidth, maxWidth, xAxisK
           <Tooltip
             cursor={false}
             content={CustomTooltip}
+            active={tooltipActive} // Force the tooltip to rely on our custom state management, to allow for smooth fade in/fade out
+            wrapperStyle={{
+              opacity: tooltipVisible ? 1 : 0, // Initially hidden
+              transition: `opacity 0.2s ease, transform 0.4s ease-in-out` // Add opacity transition for fade in/out effect. transform is default for the tooltip's movement, but it's easier to just declare it again than try to pull in existing wrapper styling
+            }}
           />
           <ReferenceLine y={0} stroke={dark_gray} />
           {dataStyles.map((b) =>
@@ -142,6 +168,8 @@ const GraphCard = ({ data, dataStyles, height, width, minWidth, maxWidth, xAxisK
                 cursor: 'pointer',
                 transition: `fill 0.2s ease` // Smooth transition for hover color
               }}
+              onMouseEnter={handleBarMouseEnter}
+              onMouseLeave={handleBarMouseLeave}
             >
               {data.map((index) => {
                 const barKey = `${b.id}-${index}`; // completely unique key to each bar for the mapping
