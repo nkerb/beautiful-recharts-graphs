@@ -106,6 +106,12 @@ const GraphCard = ({ data, dataStyles, height, width, minWidth, maxWidth, xAxisK
   const [tooltipActive, setTooltipActive] = useState(false);
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [legendHover, setLegendHover] = useState(null);
+  const [shownDatasets, setShownDatasets] = useState( // Create a list of booleans to track visibility of each dataset
+    dataStyles.reduce((obj, item) => {
+      obj[item.id] = true;
+      return obj;
+    }, {})
+  );
 
   const timeoutRef = useRef(null);
 
@@ -120,6 +126,14 @@ const GraphCard = ({ data, dataStyles, height, width, minWidth, maxWidth, xAxisK
     timeoutRef.current = setTimeout(() => {
       setTooltipActive(false); // After fade transition ends, set active to false to remove the tooltip from the DOM
     }, 200);
+  }
+
+  const handleLegendItemClick = (id) => {
+    setLegendHover(null); // Turn off the hover fade if the user has just toggled the visibility of the legend item
+    setShownDatasets({
+      ...shownDatasets,
+      [id]: !shownDatasets[id] // Toggle the visibility of the selected legend item
+    })
   }
 
   useEffect(() => {
@@ -185,6 +199,7 @@ const GraphCard = ({ data, dataStyles, height, width, minWidth, maxWidth, xAxisK
               key={b.id}
               dataKey={b.id}
               name={b.displayName}
+              hide={!shownDatasets[b.id]} // Don't display the dataset if hidden via legend click
               fill={b.fillColor}
               opacity={(legendHover === null || b.id === legendHover) ? 1 : 0.8} // Reduce opacity if another dataset is hovered in legend
               stackId={0}
@@ -217,8 +232,9 @@ const GraphCard = ({ data, dataStyles, height, width, minWidth, maxWidth, xAxisK
             }}
             iconType='circle'
             iconSize={12}
-            onMouseEnter={(payload) => { setLegendHover(payload.dataKey) }}
-            onMouseLeave={() => setLegendHover(null)}
+            onMouseEnter={(payload) => shownDatasets[payload.dataKey] && setLegendHover(payload.dataKey)} // apply hover effect if dataset is visible
+            onMouseLeave={(payload) => shownDatasets[payload.dataKey] && setLegendHover(null)} // Reset hover effect if dataset is visible (the check isn't technically necessary, but it's one less function call)
+            onClick={(payload) => handleLegendItemClick(payload.dataKey)}
           />
         </BarChart>
       </ResponsiveContainer>
