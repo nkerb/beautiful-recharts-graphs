@@ -63,11 +63,21 @@ const HoverContent = styled.div`
   margin-top: 2px;
 `;
 
+const formatMonthLabelLong = (dateString) => {
+  const date = new Date(dateString); // Create a JS Date object from the provided string
+  const options = { year: 'numeric', month: 'long' };
+  return date.toLocaleDateString('en-US', options); // Output example: "July 2022"
+}
+
+const formatValueInMillionDollars = (value) => {
+  return `$${Math.abs(value).toLocaleString()}M`; // Use absolute value here since we don't want to actually display negative values for imports
+}
+
 const CustomTooltip = ({ payload, label }) => {
   return (
     <HoverContainer>
       <HoverTitle>
-        {label}
+        {formatMonthLabelLong(label)}
       </HoverTitle>
 
       {payload.map((b) => {
@@ -76,7 +86,7 @@ const CustomTooltip = ({ payload, label }) => {
             key={b.dataKey}
             color={b.fill}
           >
-            {b.name}: {b.value}
+            {b.name}: {formatValueInMillionDollars(b.value)}
           </HoverContent>
         );
       })}
