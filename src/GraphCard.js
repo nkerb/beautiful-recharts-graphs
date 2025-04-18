@@ -69,7 +69,6 @@ const GraphCard = ({ data, dataStyles, height, width, minWidth, maxWidth, xAxisK
             </Label>
           </YAxis>
           <Tooltip />
-          <Legend />
           <ReferenceLine y={0} stroke={dark_gray} />
           {dataStyles.map((b) =>
             <Bar
@@ -81,6 +80,7 @@ const GraphCard = ({ data, dataStyles, height, width, minWidth, maxWidth, xAxisK
               radius={radiusArray}
             />
           )}
+          <Legend />
         </BarChart>
       </ResponsiveContainer>
     </CardContainer>
