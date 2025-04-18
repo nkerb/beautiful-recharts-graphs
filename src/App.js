@@ -9,6 +9,8 @@ function App() {
       yAxisLabel='Millions of USD ($)'
       height={500}
       width={1000}
+      title='US Fruit Trade Deficit'
+      subtitle='By Month'
     />
   );
 }
