@@ -1,4 +1,6 @@
-import { Bar, BarChart, Label, Legend, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { darken } from 'polished';
+import { useState } from 'react';
+import { Bar, BarChart, Cell, Label, Legend, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import styled from "styled-components";
 
 const stroke_gray = 'hsl(210, 5%, 90%)';
@@ -39,7 +41,52 @@ const CardSubtitle = styled.span`
   color: ${darkest_gray};
 `;
 
+const HoverContainer = styled.div`
+  padding: 10px;
+  border-radius: 8px;
+  background-color: hsla(0, 100%, 100%, 80%);
+  box-shadow: 0px 0px 10px 0px hsla(0, 0%, 0%, 15%);
+  backdrop-filter: blur(6px);
+  transition: opacity 0.2s ease;
+`;
+
+const HoverTitle = styled.span`
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: ${off_black};
+`;
+
+const HoverContent = styled.div`
+  font-size: 1.0rem;
+  font-weight: 400;
+  color: ${({ color }) => color || dark_gray};
+  margin-top: 2px;
+`;
+
+const CustomTooltip = ({ payload, label }) => {
+  return (
+    <HoverContainer>
+      <HoverTitle>
+        {label}
+      </HoverTitle>
+
+      {payload.map((b) => {
+        return (
+          <HoverContent
+            key={b.dataKey}
+            color={b.fill}
+          >
+            {b.name}: {b.value}
+          </HoverContent>
+        );
+      })}
+    </HoverContainer>
+  )
+}
+
 const GraphCard = ({ data, dataStyles, height, width, minWidth, maxWidth, xAxisKey, yAxisLabel, title, subtitle }) => {
+  const [hoveredBar, setHoveredBar] = useState(null);
+
   return (
     <CardContainer
       height={height}
@@ -68,7 +115,10 @@ const GraphCard = ({ data, dataStyles, height, width, minWidth, maxWidth, xAxisK
               {yAxisLabel}
             </Label>
           </YAxis>
-          <Tooltip />
+          <Tooltip
+            cursor={false}
+            content={CustomTooltip}
+          />
           <ReferenceLine y={0} stroke={dark_gray} />
           {dataStyles.map((b) =>
             <Bar
@@ -78,7 +128,24 @@ const GraphCard = ({ data, dataStyles, height, width, minWidth, maxWidth, xAxisK
               fill={b.fillColor}
               stackId={0}
               radius={radiusArray}
-            />
+              style={{
+                cursor: 'pointer',
+                transition: `fill 0.2s ease` // Smooth transition for hover color
+              }}
+            >
+              {data.map((index) => {
+                const barKey = `${b.id}-${index}`; // completely unique key to each bar for the mapping
+                const hoverKey = index; // index-based key to each x-axis segment for hover functionality
+                return (
+                  <Cell
+                    key={barKey}
+                    fill={hoveredBar === hoverKey ? darken(0.05, b.fillColor) : b.fillColor} // Darken color if bar is hovered
+                    onMouseEnter={() => setHoveredBar(hoverKey)}
+                    onMouseLeave={() => setHoveredBar(null)}
+                  />
+                );
+              })}
+            </Bar>
           )}
           <Legend />
         </BarChart>
