@@ -1,4 +1,4 @@
-import { Bar, BarChart, Label, Legend, ReferenceLine, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, Label, Legend, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import styled from "styled-components";
 
 const stroke_gray = 'hsl(210, 5%, 90%)';
@@ -12,15 +12,18 @@ const barRadius = 16;
 const radiusArray = [barRadius, barRadius, 0, 0];
 
 const CardContainer = styled.div`
+  box-sizing: border-box;
   background-color: white;
   border: 1px solid ${stroke_gray};
-  box-sizing: border-box;
+  border-radius: 16px;
+  box-shadow: 0px 0px 10px 0px hsla(0, 0%, 0%, 5%);
+  font-family: 'Inter', sans-serif;
   padding: 20px;
   margin: 20px;
-  box-shadow: 0px 0px 10px 0px hsla(0, 0%, 0%, 5%);
-  border-radius: 16px;
-  width: min-content;
-  font-family: 'Inter', sans-serif;
+  height: ${({ height }) => height ? `${height}px` : 'auto'};
+  width: ${({ width }) => width ? `${width}px` : 'auto'};
+  min-width: ${({ $minWidth }) => $minWidth ? `${$minWidth}px` : 'auto'}; // Use transient props to prevent DOM warning (https://medium.com/@probablyup/introducing-transient-props-f35fd5203e0c)
+  max-width: ${({ $maxWidth }) => $maxWidth ? `${$maxWidth}px` : 'auto'};
 `;
 
 const CardTitle = styled.span`
@@ -41,46 +44,51 @@ const CardSubtitle = styled.span`
 const GraphCard = ({ data, height, width, minWidth, maxWidth, xAxisKey, yAxisLabel, title, subtitle }) => {
   return (
     <CardContainer
+      height={height}
+      width={width}
       $minWidth={minWidth}
       $maxWidth={maxWidth}
     >
       <CardTitle>{title}</CardTitle>
       <CardSubtitle>{subtitle}</CardSubtitle>
-      <BarChart
-        data={data}
-        stackOffset='sign'
-        width={width}
-        height={height}
-        margin={{ left: 13, top: 20, right: 10 }}
+      <ResponsiveContainer
+        height='100%'
+        width='100%'
       >
-        <XAxis dataKey={xAxisKey} />
-        <YAxis type='number'>
-          <Label
-            angle={-90}
-            position='left'
-            style={{ textAnchor: 'middle' }}
-          >
-            {yAxisLabel}
-          </Label>
-        </YAxis>
-        <Tooltip />
-        <Legend />
-        <ReferenceLine y={0} stroke={dark_gray} />
-        <Bar
-          dataKey='exports'
-          name='Exports'
-          fill={exportFill}
-          stackId={0}
-          radius={radiusArray}
-        />
-        <Bar
-          dataKey='imports'
-          name='Imports'
-          fill={importFill}
-          stackId={0}
-          radius={radiusArray}
-        />
-      </BarChart>
+        <BarChart
+          data={data}
+          stackOffset='sign'
+          margin={{ left: 13, top: 20, right: 10, bottom: 20 }}
+        >
+          <XAxis dataKey={xAxisKey} />
+          <YAxis type='number'>
+            <Label
+              angle={-90}
+              position='left'
+              style={{ textAnchor: 'middle' }}
+            >
+              {yAxisLabel}
+            </Label>
+          </YAxis>
+          <Tooltip />
+          <Legend />
+          <ReferenceLine y={0} stroke={dark_gray} />
+          <Bar
+            dataKey='exports'
+            name='Exports'
+            fill={exportFill}
+            stackId={0}
+            radius={radiusArray}
+          />
+          <Bar
+            dataKey='imports'
+            name='Imports'
+            fill={importFill}
+            stackId={0}
+            radius={radiusArray}
+          />
+        </BarChart>
+      </ResponsiveContainer>
     </CardContainer>
   );
 }
