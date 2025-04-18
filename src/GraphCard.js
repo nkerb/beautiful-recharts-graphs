@@ -102,7 +102,7 @@ const GraphCard = ({ data, dataStyles, height, width, minWidth, maxWidth, xAxisK
       >
         <BarChart
           data={data}
-          stackOffset='sign'
+          stackOffset='sign' // Allow both positive and negative values to be shown on the graph
           margin={{ left: 13, top: 20, right: 10, bottom: 20 }}
         >
           <XAxis dataKey={xAxisKey} />
