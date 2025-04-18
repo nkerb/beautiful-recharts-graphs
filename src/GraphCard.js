@@ -25,6 +25,20 @@ const CardContainer = styled.div`
   width: ${({ width }) => width ? `${width}px` : 'auto'};
   min-width: ${({ $minWidth }) => $minWidth ? `${$minWidth}px` : 'auto'}; // Use transient props to prevent DOM warning (https://medium.com/@probablyup/introducing-transient-props-f35fd5203e0c)
   max-width: ${({ $maxWidth }) => $maxWidth ? `${$maxWidth}px` : 'auto'};
+  .recharts-default-legend {
+    li:last-child {
+      margin-right: 0px !important; // Remove margin from the last legend item to ensure legend is centered in container
+    }
+    .recharts-legend-item {
+      cursor: pointer; // Apply pointer to only individual legend items
+      .recharts-symbols { // Add color transitions to legend items when toggling display of datasets
+        transition: fill 0.2s ease;
+      }
+      .recharts-legend-item-text {
+        transition: color 0.2s ease;
+      }
+    }
+  }
 `;
 
 const CardTitle = styled.span`
@@ -247,8 +261,7 @@ const GraphCard = ({ data, dataStyles, height, width, minWidth, maxWidth, xAxisK
           )}
           <Legend
             wrapperStyle={{
-              marginBottom: -30,
-              cursor: 'pointer'
+              marginBottom: -30
             }}
             iconType='circle'
             iconSize={12}
