@@ -105,6 +105,7 @@ const GraphCard = ({ data, dataStyles, height, width, minWidth, maxWidth, xAxisK
   const [hoveredBar, setHoveredBar] = useState(null);
   const [tooltipActive, setTooltipActive] = useState(false);
   const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [legendHover, setLegendHover] = useState(null);
 
   const timeoutRef = useRef(null);
 
@@ -185,11 +186,12 @@ const GraphCard = ({ data, dataStyles, height, width, minWidth, maxWidth, xAxisK
               dataKey={b.id}
               name={b.displayName}
               fill={b.fillColor}
+              opacity={(legendHover === null || b.id === legendHover) ? 1 : 0.8} // Reduce opacity if another dataset is hovered in legend
               stackId={0}
               radius={radiusArray}
               style={{
                 cursor: 'pointer',
-                transition: `fill 0.2s ease` // Smooth transition for hover color
+                transition: 'fill 0.2s ease, opacity 0.2s ease' // Smooth transition for bar hover (fill) and dataset legend hover (opacity)
               }}
               onMouseEnter={handleBarMouseEnter}
               onMouseLeave={handleBarMouseLeave}
@@ -211,7 +213,12 @@ const GraphCard = ({ data, dataStyles, height, width, minWidth, maxWidth, xAxisK
           <Legend
             wrapperStyle={{
               marginBottom: -30,
+              cursor: 'pointer'
             }}
+            iconType='circle'
+            iconSize={12}
+            onMouseEnter={(payload) => { setLegendHover(payload.dataKey) }}
+            onMouseLeave={() => setLegendHover(null)}
           />
         </BarChart>
       </ResponsiveContainer>
